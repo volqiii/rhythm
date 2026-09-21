@@ -3,47 +3,226 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Личный трекер регулярности с календарём отметок и целью на 70 дней.">
-    <meta name="theme-color" content="#0b1020">
-    <title>Ритм — трекер регулярности</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%230b1020'/%3E%3Cpath d='M15 35c9 0 13-7 18-19 5 15 10 20 17 20' fill='none' stroke='%237c5cff' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+    <meta name="theme-color" content="#071221">
+    <title>Rhythm — календарь регулярности</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-      :root { color-scheme:dark; --bg:#080d19; --surface:#111a2e; --surface-2:#16223b; --line:rgba(190,207,255,.14); --ink:#f3f6ff; --muted:#9dabc5; --violet:#8567ff; --cyan:#56d6ff; --lime:#b8f36a; --quiet:#26334d; --future:#1a253b; }
+      :root { --bg:#071221; --surface:#0d1a30; --surface-2:#101f38; --line:#253754; --text:#f2f6ff; --muted:#91a4c4; --muted-2:#667b9f; --cyan:#58d7ff; --lime:#b8f36a; --quiet:#1b2b46; --future:#111e33; --focus:#6e7cff; }
       * { box-sizing:border-box; }
-      body { min-width:320px; min-height:100vh; margin:0; background:radial-gradient(circle at 12% 8%, #172b5b 0, transparent 27rem), radial-gradient(circle at 92% 88%, #271e56 0, transparent 30rem), var(--bg); color:var(--ink); font:16px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
-      .shell { width:min(1180px, calc(100% - 40px)); margin:32px auto; overflow:hidden; border:1px solid var(--line); border-radius:28px; background:linear-gradient(145deg, rgba(21,33,58,.96), rgba(10,16,30,.98)); box-shadow:0 26px 80px rgba(0,0,0,.32); }
-      .hero { display:flex; align-items:flex-start; justify-content:space-between; gap:28px; padding:44px 46px 38px; border-bottom:1px solid var(--line); background:linear-gradient(105deg, rgba(133,103,255,.18), transparent 48%), radial-gradient(circle at 84% 38%, rgba(86,214,255,.15), transparent 20rem); }
-      .brand-mark { display:inline-flex; align-items:center; gap:9px; margin-bottom:16px; color:var(--cyan); font-size:.75rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
-      .brand-mark::before { width:11px; height:11px; border-radius:50%; background:var(--lime); box-shadow:0 0 0 5px rgba(184,243,106,.12); content:""; }
-      h1 { margin:0; font-size:clamp(2.7rem, 7vw, 5.2rem); font-weight:780; letter-spacing:-.075em; line-height:.88; }
-      .intro { max-width:49ch; margin:17px 0 0; color:var(--muted); font-size:1.02rem; }
-      .today { display:flex; min-width:190px; flex-direction:column; gap:7px; padding:15px 17px; border:1px solid rgba(184,243,106,.28); border-radius:16px; background:rgba(7,14,26,.42); color:var(--muted); font-size:.8rem; }
-      .today strong { color:var(--ink); font-size:1rem; }.today small { color:var(--lime); font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
-      .dashboard { display:grid; grid-template-columns:1.36fr 1fr 1fr; gap:12px; padding:22px; }.panel { min-height:170px; padding:22px; border:1px solid var(--line); border-radius:18px; background:rgba(22,34,59,.8); }
-      .progress-panel { position:relative; overflow:hidden; background:linear-gradient(135deg, #6751de, #284d91); }.progress-panel::after { position:absolute; width:170px; height:170px; right:-60px; bottom:-80px; border:24px solid rgba(255,255,255,.1); border-radius:50%; content:""; }
-      .label { display:block; color:var(--muted); font-size:.76rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }.progress-panel .label { color:rgba(255,255,255,.72); }
-      .counter { display:flex; align-items:baseline; gap:8px; margin:16px 0 18px; }.counter strong { font-size:clamp(3.2rem, 6vw, 5rem); line-height:.8; letter-spacing:-.08em; }.counter span { color:rgba(255,255,255,.75); font-weight:700; }
-      .progress-rail { position:relative; z-index:1; height:8px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.2); }.progress-rail i { display:block; width:0; height:100%; border-radius:inherit; background:var(--lime); box-shadow:0 0 18px rgba(184,243,106,.65); transition:width .5s ease; }
-      .progress-note { position:relative; z-index:1; margin:10px 0 0; color:rgba(255,255,255,.78); font-size:.84rem; }.stat-value { display:block; margin-top:18px; font-size:clamp(2.4rem, 4.5vw, 3.5rem); font-weight:780; letter-spacing:-.07em; line-height:.82; }.streak .stat-value { color:var(--cyan); }.last .stat-value { max-width:9ch; font-size:clamp(1.55rem, 3vw, 2.15rem); line-height:.98; }.stat-note { display:block; margin-top:15px; color:var(--muted); font-size:.84rem; }
-      .calendar { margin:0 22px 22px; padding:27px 24px 25px; border:1px solid var(--line); border-radius:20px; background:rgba(8,14,27,.36); }.calendar-top { display:flex; align-items:end; justify-content:space-between; gap:18px; padding-bottom:18px; border-bottom:1px solid var(--line); }h2 { margin:0; font-size:1.35rem; letter-spacing:-.04em; }.legend { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.82rem; }.legend::before { width:10px; height:10px; border-radius:3px; background:var(--lime); box-shadow:0 0 0 4px rgba(184,243,106,.1); content:""; }
-      .months { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:28px 30px; padding-top:25px; }.month { min-width:0; }.month-name { margin:0 0 10px; color:#dce5ff; font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }.weekday { display:grid; grid-template-columns:repeat(7, 1fr); margin:0 0 7px; color:#73829e; font-size:.62rem; font-weight:750; text-align:center; }.month-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:5px; }.day { aspect-ratio:1; min-width:0; border:0; border-radius:4px; background:var(--quiet); padding:0; }.day.active { background:var(--lime); box-shadow:0 0 0 1px rgba(184,243,106,.4), 0 0 14px rgba(184,243,106,.16); }.day.future { background:var(--future); }.day.empty { background:transparent; }.day.today-cell { outline:2px solid var(--violet); outline-offset:2px; }
-      .footer { display:flex; justify-content:space-between; gap:16px; padding:0 46px 27px; color:var(--muted); font-size:.81rem; }.footer p { margin:0; }.footer strong { color:#d7e0fa; }
-      @media (max-width:820px) { .shell { width:min(100% - 24px, 700px); margin:12px auto; border-radius:22px; }.hero { padding:32px 28px; }.dashboard { grid-template-columns:1fr 1fr; }.progress-panel { grid-column:span 2; }.calendar { margin:0 12px 12px; padding:24px 18px; }.months { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:25px 16px; }.footer { padding:12px 28px 25px; flex-direction:column; } }
-      @media (max-width:530px) { .hero { display:block; padding:28px 22px; }.today { width:100%; margin-top:24px; }.dashboard { grid-template-columns:1fr; padding:12px; }.progress-panel { grid-column:auto; }.panel { min-height:140px; }.months { gap:22px 11px; }.month-grid { gap:3px; }.calendar-top { align-items:flex-start; flex-direction:column; }.footer { padding:14px 22px 24px; } }
-          .brand-mark::before { display:none; }.brand-mark img { width:28px; height:28px; border-radius:8px; box-shadow:0 0 0 1px rgba(184,243,106,.18); }\n    </style>
+      body { min-width:320px; min-height:100vh; margin:0; background:linear-gradient(145deg,#0a1830 0%,#071221 48%,#081625 100%); color:var(--text); font:16px/1.5 Manrope,Arial,sans-serif; }
+      button { font:inherit; }
+      .shell { width:min(100% - 32px,1180px); margin:24px auto; overflow:hidden; border:1px solid rgba(129,159,207,.28); border-radius:28px; background:rgba(8,18,34,.86); box-shadow:0 20px 70px rgba(0,0,0,.28); }
+      .hero { display:flex; align-items:flex-start; justify-content:space-between; gap:28px; padding:34px 46px 32px; border-bottom:1px solid var(--line); background:linear-gradient(115deg,rgba(73,80,176,.38),rgba(13,31,56,.08) 60%),var(--surface); }
+      .brand { display:flex; align-items:center; gap:15px; }
+      .brand img { width:58px; height:58px; border-radius:16px; }
+      .eyebrow { margin:0 0 3px; color:var(--cyan); font-size:.74rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+      h1 { margin:0; font-size:clamp(2rem,4.5vw,3.6rem); font-weight:800; letter-spacing:-.06em; line-height:1; }
+      .intro { max-width:49ch; margin:18px 0 0; color:var(--muted); font-size:1rem; }
+      .today { min-width:208px; padding:16px 18px; border:1px solid rgba(184,243,106,.45); border-radius:18px; background:rgba(7,18,33,.58); }
+      .today small { display:block; color:var(--lime); font-size:.7rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+      .today strong { display:block; margin-top:6px; font-size:1.13rem; letter-spacing:-.03em; }
+      .today span { display:block; margin-top:4px; color:var(--muted); font-size:.8rem; }
+      .dashboard { display:grid; grid-template-columns:1.25fr .9fr .9fr; gap:12px; padding:22px 22px 12px; }
+      .panel { min-height:172px; padding:23px; border:1px solid var(--line); border-radius:20px; background:var(--surface); }
+      .panel.primary { position:relative; overflow:hidden; border-color:transparent; background:linear-gradient(135deg,#5e54d6,#315ba2); }
+      .panel.primary::after { position:absolute; right:-42px; bottom:-60px; width:190px; height:190px; border:22px solid rgba(255,255,255,.12); border-radius:50%; content:""; }
+      .label { display:block; color:var(--muted); font-size:.72rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+      .primary .label { color:rgba(255,255,255,.8); }
+      .value { display:block; margin-top:17px; font-size:clamp(2.6rem,5vw,4.25rem); font-weight:800; letter-spacing:-.075em; line-height:.8; }
+      .value span { margin-left:7px; color:rgba(255,255,255,.78); font-size:.95rem; letter-spacing:-.02em; }
+      .streak .value { color:var(--cyan); }
+      .last .value { font-size:clamp(1.55rem,3vw,2.25rem); line-height:1; }
+      .note { display:block; position:relative; z-index:1; margin-top:17px; color:var(--muted); font-size:.84rem; }
+      .primary .note { color:rgba(255,255,255,.82); }
+      .progress { position:relative; z-index:1; height:8px; margin-top:20px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.22); }
+      .progress span { display:block; width:0; height:100%; border-radius:inherit; background:var(--lime); transition:width .35s ease; }
+      .calendar { margin:12px 22px 22px; padding:25px 24px 21px; border:1px solid var(--line); border-radius:20px; background:rgba(6,14,27,.45); }
+      .calendar-top { display:flex; align-items:center; justify-content:space-between; gap:18px; padding-bottom:18px; border-bottom:1px solid var(--line); }
+      h2 { margin:0; font-size:1.35rem; letter-spacing:-.04em; }
+      .legend { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.8rem; }
+      .legend i { width:11px; height:11px; border-radius:4px; background:var(--lime); box-shadow:0 0 0 4px rgba(184,243,106,.1); }
+      .month { max-width:760px; margin:25px auto 0; }
+      .month-name { margin:0 0 18px; color:#dce8ff; font-size:1rem; font-weight:800; text-align:center; text-transform:capitalize; }
+      .weekday, .month-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+      .weekday { margin-bottom:8px; color:var(--muted-2); font-size:.72rem; font-weight:800; text-align:center; }
+      .day { display:grid; min-width:0; aspect-ratio:1; place-items:center; border:1px solid transparent; border-radius:12px; background:var(--quiet); color:#d8e3f8; font-size:clamp(.78rem,1.6vw,1rem); font-weight:700; }
+      .day.future { background:var(--future); color:#4f6282; }
+      .day.active { border-color:rgba(184,243,106,.72); background:var(--lime); color:#172514; box-shadow:0 7px 16px rgba(184,243,106,.17); }
+      .day.today { outline:2px solid var(--focus); outline-offset:2px; }
+      .day.empty { visibility:hidden; }
+      .month-navigation { display:flex; align-items:center; justify-content:center; gap:12px; margin-top:24px; }
+      .nav-button { display:inline-flex; align-items:center; justify-content:center; min-width:144px; min-height:44px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); color:var(--text); cursor:pointer; font-size:.85rem; font-weight:700; }
+      .nav-button:hover:not(:disabled) { border-color:var(--cyan); color:var(--cyan); }
+      .nav-button:disabled { cursor:not-allowed; opacity:.35; }
+      .nav-button .arrow { margin:0 8px; color:var(--cyan); font-size:1.1rem; }
+      .footer { display:flex; justify-content:space-between; gap:16px; padding:0 46px 28px; color:var(--muted); font-size:.78rem; }
+      .footer p { margin:0; }
+      .footer strong { color:#dce8ff; }
+      @media (max-width:820px) { .shell { width:min(100% - 20px,700px); margin:10px auto; border-radius:22px; }.hero { padding:28px; }.dashboard { grid-template-columns:1fr 1fr; }.primary { grid-column:span 2; }.calendar { margin:12px; padding:22px 18px 18px; }.footer { padding:4px 28px 25px; flex-direction:column; } }
+      @media (max-width:540px) { .hero { display:block; padding:24px 20px; }.today { width:100%; margin-top:24px; }.dashboard { grid-template-columns:1fr; padding:12px; }.primary { grid-column:auto; }.panel { min-height:142px; }.calendar { padding:20px 14px 16px; }.calendar-top { align-items:flex-start; flex-direction:column; }.weekday, .month-grid { gap:5px; }.day { border-radius:8px; }.nav-button { min-width:0; flex:1; }.footer { padding:8px 22px 23px; } }
+    </style>
   </head>
   <body>
     <main class="shell">
-      <header class="hero"><div><span class="brand-mark"><img src="./assets/rhythm-mark.svg" alt="" aria-hidden="true">activity log · <span id="year-head">2026</span></span><h1>Ритм</h1><p class="intro">Личный трекер регулярности: один новый день — одна честная отметка в календаре.</p></div><div class="today"><small>сегодня</small><strong id="today-label">Загрузка даты…</strong><span>Екатеринбург · 00:05</span></div></header>
-      <section class="dashboard" aria-label="Статистика активности"><article class="panel progress-panel"><span class="label">прогресс цели</span><div class="counter"><strong id="total">—</strong><span>из <span id="target">70</span></span></div><div class="progress-rail" role="progressbar" aria-label="Прогресс цели" aria-valuemin="0" aria-valuemax="70" aria-valuenow="0"><i id="progress-bar"></i></div><p class="progress-note" id="progress-note">Считаем отметки…</p></article><article class="panel streak"><span class="label">текущая серия</span><strong class="stat-value" id="streak">—</strong><span class="stat-note">дней подряд</span></article><article class="panel last"><span class="label">последняя отметка</span><strong class="stat-value" id="last">—</strong><span class="stat-note">по местному времени</span></article></section>
-      <section class="calendar" aria-labelledby="calendar-title"><div class="calendar-top"><h2 id="calendar-title">Календарь <span id="year"></span></h2><span class="legend">день с отметкой</span></div><div class="months" id="months" aria-live="polite"></div></section>
-      <footer class="footer"><p>Отметка появляется после успешного коммита.</p><p id="updated">Загрузка данных…</p></footer>
+      <header class="hero">
+        <div>
+          <div class="brand">
+            <img src="./assets/rhythm-mark.svg" alt="Логотип Rhythm">
+            <div>
+              <p class="eyebrow">Личный проект · <span id="year-head">2026</span></p>
+              <h1>Rhythm</h1>
+            </div>
+          </div>
+          <p class="intro">Календарь регулярности без лишнего: одна дата — одна честная отметка.</p>
+        </div>
+        <div class="today">
+          <small>Сегодня</small>
+          <strong id="today-label">Загрузка даты…</strong>
+          <span>Дата меняется автоматически</span>
+        </div>
+      </header>
+
+      <section class="dashboard" aria-label="Статистика">
+        <article class="panel primary">
+          <span class="label">Прогресс цели</span>
+          <strong class="value"><span id="total">0</span><span>из <span id="target">70</span></span></strong>
+          <div class="progress" aria-label="Прогресс цели"><span id="progress-bar"></span></div>
+          <span class="note" id="progress-note"></span>
+        </article>
+        <article class="panel streak">
+          <span class="label">Текущая серия</span>
+          <strong class="value" id="streak">0</strong>
+          <span class="note">дней подряд</span>
+        </article>
+        <article class="panel last">
+          <span class="label">Последняя отметка</span>
+          <strong class="value" id="last">—</strong>
+          <span class="note" id="updated">Данные загружаются…</span>
+        </article>
+      </section>
+
+      <section class="calendar" aria-labelledby="calendar-title">
+        <div class="calendar-top">
+          <h2 id="calendar-title">Календарь</h2>
+          <span class="legend"><i></i>день с отметкой</span>
+        </div>
+        <div class="month" id="month" aria-live="polite"></div>
+        <div class="month-navigation">
+          <button class="nav-button" id="previous-month" type="button"><span class="arrow">←</span>Предыдущий</button>
+          <button class="nav-button" id="next-month" type="button">Следующий<span class="arrow">→</span></button>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p><strong>Rhythm</strong> — маленький шаг каждый день.</p>
+        <p>Обновлено: <span id="footer-updated">—</span></p>
+      </footer>
     </main>
     <script>
-      const TZ='Asia/Yekaterinburg',fmt=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}),rufmt=new Intl.DateTimeFormat('ru-RU',{timeZone:TZ,day:'numeric',month:'long'}),monthNames=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],isoToday=fmt.format(new Date());
-      function isoDate(year,month,day){return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`}function calculateStreak(active,today){let value=0,cursor=new Date(`${today}T12:00:00Z`);while(active.has(cursor.toISOString().slice(0,10))){value++;cursor.setUTCDate(cursor.getUTCDate()-1)}return value}
-      function render(data){const active=new Set(data.days||[]),year=Number(data.year||isoToday.slice(0,4)),target=Number(data.targetDays||70),total=active.size,percent=Math.min(100,Math.round(total/target*100));document.getElementById('year').textContent=year;document.getElementById('year-head').textContent=year;document.getElementById('today-label').textContent=rufmt.format(new Date());document.getElementById('total').textContent=total;document.getElementById('target').textContent=target;document.getElementById('streak').textContent=calculateStreak(active,isoToday);const bar=document.getElementById('progress-bar');bar.style.width=`${percent}%`;bar.parentElement.setAttribute('aria-valuenow',total);document.getElementById('progress-note').textContent=total>=target?'Цель достигнута.':`Осталось ${target-total} ${target-total===1?'день':'дней'} до цели.`;const newest=[...active].sort().at(-1);document.getElementById('last').textContent=newest?rufmt.format(new Date(`${newest}T12:00:00Z`)):'ещё нет';document.getElementById('updated').textContent=data.updatedAt?`Обновлено ${new Intl.DateTimeFormat('ru-RU',{timeZone:TZ,dateStyle:'medium',timeStyle:'short'}).format(new Date(data.updatedAt))}`:'Ожидает первой отметки';const holder=document.getElementById('months');holder.innerHTML='';for(let m=0;m<12;m++){const box=document.createElement('section');box.className='month';box.setAttribute('aria-label',monthNames[m]);box.innerHTML=`<h3 class="month-name">${monthNames[m]}</h3><div class="weekday">${dayNames.map(x=>`<span>${x}</span>`).join('')}</div>`;const grid=document.createElement('div');grid.className='month-grid';const first=(new Date(Date.UTC(year,m,1)).getUTCDay()+6)%7;for(let i=0;i<first;i++){const e=document.createElement('i');e.className='day empty';grid.append(e)}const count=new Date(Date.UTC(year,m+1,0)).getUTCDate();for(let d=1;d<=count;d++){const iso=isoDate(year,m,d),cell=document.createElement('i'),future=iso>isoToday;cell.className=`day${active.has(iso)?' active':''}${future?' future':''}${iso===isoToday?' today-cell':''}`;cell.title=`${d} ${monthNames[m]}: ${active.has(iso)?'есть отметка':'нет отметки'}`;grid.append(cell)}box.append(grid);holder.append(box)}}
-      fetch('./data/checkins.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(render).catch(()=>render({year:Number(isoToday.slice(0,4)),days:[],updatedAt:null}));
+      const TZ = 'Asia/Yekaterinburg';
+      const monthNames = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+      const dayNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+      const dateParts = new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+      const part = name => dateParts.find(item => item.type === name).value;
+      const isoToday = [part('year'),part('month'),part('day')].join('-');
+      const humanDate = new Intl.DateTimeFormat('ru-RU',{timeZone:TZ,day:'numeric',month:'long'});
+      let viewYear;
+      let viewMonth;
+      let sourceData;
+
+      function isoDate(year,month,day) {
+        return [year,String(month + 1).padStart(2,'0'),String(day).padStart(2,'0')].join('-');
+      }
+      function dateFromIso(iso) {
+        return new Date(iso + 'T12:00:00Z');
+      }
+      function currentStreak(active,today) {
+        let total = 0;
+        const cursor = dateFromIso(today);
+        while (active.has(cursor.toISOString().slice(0,10))) {
+          total += 1;
+          cursor.setUTCDate(cursor.getUTCDate() - 1);
+        }
+        return total;
+      }
+      function renderMonth(active) {
+        const holder = document.getElementById('month');
+        holder.innerHTML = '';
+        const title = document.createElement('h3');
+        title.className = 'month-name';
+        title.textContent = monthNames[viewMonth] + ' ' + viewYear;
+        const weekdays = document.createElement('div');
+        weekdays.className = 'weekday';
+        dayNames.forEach(name => {
+          const item = document.createElement('span');
+          item.textContent = name;
+          weekdays.append(item);
+        });
+        const grid = document.createElement('div');
+        grid.className = 'month-grid';
+        const first = (new Date(Date.UTC(viewYear,viewMonth,1)).getUTCDay() + 6) % 7;
+        for (let index = 0; index < first; index += 1) {
+          const empty = document.createElement('i');
+          empty.className = 'day empty';
+          grid.append(empty);
+        }
+        const days = new Date(Date.UTC(viewYear,viewMonth + 1,0)).getUTCDate();
+        for (let day = 1; day <= days; day += 1) {
+          const iso = isoDate(viewYear,viewMonth,day);
+          const cell = document.createElement('span');
+          cell.className = 'day';
+          cell.textContent = day;
+          if (iso > isoToday) cell.classList.add('future');
+          if (active.has(iso)) cell.classList.add('active');
+          if (iso === isoToday) cell.classList.add('today');
+          cell.setAttribute('aria-label',day + ' ' + monthNames[viewMonth] + (active.has(iso) ? ', есть отметка' : ', нет отметки'));
+          grid.append(cell);
+        }
+        holder.append(title,weekdays,grid);
+        document.getElementById('calendar-title').textContent = 'Календарь ' + viewYear;
+        const minimum = Number(sourceData.year);
+        document.getElementById('previous-month').disabled = viewYear === minimum && viewMonth === 0;
+        document.getElementById('next-month').disabled = viewYear === minimum && viewMonth === 11;
+      }
+      function render(data) {
+        sourceData = data;
+        const active = new Set(data.days || []);
+        const year = Number(data.year || isoToday.slice(0,4));
+        const target = Number(data.targetDays || 70);
+        const total = active.size;
+        const latest = [...active].sort().at(-1);
+        viewYear = year;
+        viewMonth = Number(isoToday.slice(5,7)) - 1;
+        if (Number(isoToday.slice(0,4)) !== year) viewMonth = 0;
+        document.getElementById('year-head').textContent = year;
+        document.getElementById('today-label').textContent = humanDate.format(new Date());
+        document.getElementById('total').textContent = total;
+        document.getElementById('target').textContent = target;
+        document.getElementById('streak').textContent = currentStreak(active,isoToday);
+        document.getElementById('last').textContent = latest ? humanDate.format(dateFromIso(latest)) : 'ещё нет';
+        document.getElementById('progress-bar').style.width = Math.min(100,Math.round(total / target * 100)) + '%';
+        document.getElementById('progress-note').textContent = total >= target ? 'Цель достигнута.' : 'Осталось ' + (target - total) + ' дней до цели.';
+        const updated = data.updatedAt ? new Intl.DateTimeFormat('ru-RU',{timeZone:TZ,dateStyle:'medium'}).format(new Date(data.updatedAt)) : '—';
+        document.getElementById('updated').textContent = 'данные обновлены ' + updated;
+        document.getElementById('footer-updated').textContent = updated;
+        document.getElementById('previous-month').addEventListener('click',() => {
+          if (viewMonth === 0) { viewMonth = 11; viewYear -= 1; } else { viewMonth -= 1; }
+          renderMonth(active);
+        });
+        document.getElementById('next-month').addEventListener('click',() => {
+          if (viewMonth === 11) { viewMonth = 0; viewYear += 1; } else { viewMonth += 1; }
+          renderMonth(active);
+        });
+        renderMonth(active);
+      }
+      fetch('./data/checkins.json',{cache:'no-store'}).then(response => {
+        if (!response.ok) throw new Error('Не удалось загрузить данные');
+        return response.json();
+      }).then(render).catch(error => {
+        document.getElementById('updated').textContent = error.message;
+      });
     </script>
   </body>
 </html>
