@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/volqiii/volqiii/main/assets/rhythm-project-v2.svg" alt="Rhythm" width="100%">
+</p>
+
 # Ритм
 
 > Личный трекер регулярности: календарь, цель и один аккуратный коммит за новый день.
