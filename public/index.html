@@ -27,11 +27,13 @@
       .dashboard { display:grid; grid-template-columns:1.25fr .9fr .9fr; gap:12px; padding:22px 22px 12px; }
       .panel { min-height:172px; padding:23px; border:1px solid var(--line); border-radius:20px; background:var(--surface); }
       .panel.primary { position:relative; overflow:hidden; border-color:transparent; background:linear-gradient(135deg,#5e54d6,#315ba2); }
-      .panel.primary::after { position:absolute; right:-42px; bottom:-60px; width:190px; height:190px; border:22px solid rgba(255,255,255,.12); border-radius:50%; content:""; }
+      .primary-mark { position:absolute; right:22px; bottom:21px; z-index:0; width:118px; height:118px; border-radius:25px; box-shadow:0 16px 28px rgba(6,13,37,.25); }
       .label { display:block; color:var(--muted); font-size:.72rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
       .primary .label { color:rgba(255,255,255,.8); }
       .value { display:block; margin-top:17px; font-size:clamp(2.6rem,5vw,4.25rem); font-weight:800; letter-spacing:-.075em; line-height:.8; }
-      .value span { margin-left:7px; color:rgba(255,255,255,.78); font-size:.95rem; letter-spacing:-.02em; }
+      .value b { font:inherit; }
+      .value > span { margin-left:9px; color:rgba(255,255,255,.8); font-size:1rem; letter-spacing:-.02em; }
+      .value > span span { margin:0; font-size:inherit; }
       .streak .value { color:var(--cyan); }
       .last .value { font-size:clamp(1.55rem,3vw,2.25rem); line-height:1; }
       .note { display:block; position:relative; z-index:1; margin-top:17px; color:var(--muted); font-size:.84rem; }
@@ -49,9 +51,9 @@
       .weekday { margin-bottom:8px; color:var(--muted-2); font-size:.72rem; font-weight:800; text-align:center; }
       .day { display:grid; min-width:0; aspect-ratio:1; place-items:center; border:1px solid transparent; border-radius:12px; background:var(--quiet); color:#d8e3f8; font-size:clamp(.78rem,1.6vw,1rem); font-weight:700; }
       .day.future { background:var(--future); color:#4f6282; }
+      .day.adjacent { border-color:rgba(79,108,150,.22); background:rgba(27,43,70,.42); color:#7183a0; opacity:.58; }
       .day.active { border-color:rgba(184,243,106,.72); background:var(--lime); color:#172514; box-shadow:0 7px 16px rgba(184,243,106,.17); }
       .day.today { outline:2px solid var(--focus); outline-offset:2px; }
-      .day.empty { visibility:hidden; }
       .month-navigation { display:flex; align-items:center; justify-content:center; gap:12px; margin-top:24px; }
       .nav-button { display:inline-flex; align-items:center; justify-content:center; min-width:144px; min-height:44px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); color:var(--text); cursor:pointer; font-size:.85rem; font-weight:700; }
       .nav-button:hover:not(:disabled) { border-color:var(--cyan); color:var(--cyan); }
@@ -87,9 +89,10 @@
       <section class="dashboard" aria-label="Статистика">
         <article class="panel primary">
           <span class="label">Прогресс цели</span>
-          <strong class="value"><span id="total">0</span><span>из <span id="target">70</span></span></strong>
+          <strong class="value"><b id="total">0</b><span>из <span id="target">70</span></span></strong>
           <div class="progress" aria-label="Прогресс цели"><span id="progress-bar"></span></div>
           <span class="note" id="progress-note"></span>
+          <img class="primary-mark" src="./assets/rhythm-mark.svg" alt="">
         </article>
         <article class="panel streak">
           <span class="label">Текущая серия</span>
@@ -163,22 +166,31 @@
         const grid = document.createElement('div');
         grid.className = 'month-grid';
         const first = (new Date(Date.UTC(viewYear,viewMonth,1)).getUTCDay() + 6) % 7;
+        const previousMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+        const previousYear = viewMonth === 0 ? viewYear - 1 : viewYear;
+        const previousDays = new Date(Date.UTC(previousYear,previousMonth + 1,0)).getUTCDate();
+        function appendDay(day,year,month,adjacent) {
+          const iso = isoDate(year,month,day);
+          const cell = document.createElement('span');
+          cell.className = 'day' + (adjacent ? ' adjacent' : '');
+          cell.textContent = day;
+          if (!adjacent && iso > isoToday) cell.classList.add('future');
+          if (!adjacent && active.has(iso)) cell.classList.add('active');
+          if (!adjacent && iso === isoToday) cell.classList.add('today');
+          cell.setAttribute('aria-label',day + ' ' + monthNames[month] + (adjacent ? ', соседний месяц' : active.has(iso) ? ', есть отметка' : ', нет отметки'));
+          grid.append(cell);
+        }
         for (let index = 0; index < first; index += 1) {
-          const empty = document.createElement('i');
-          empty.className = 'day empty';
-          grid.append(empty);
+          appendDay(previousDays - first + index + 1,previousYear,previousMonth,true);
         }
         const days = new Date(Date.UTC(viewYear,viewMonth + 1,0)).getUTCDate();
         for (let day = 1; day <= days; day += 1) {
-          const iso = isoDate(viewYear,viewMonth,day);
-          const cell = document.createElement('span');
-          cell.className = 'day';
-          cell.textContent = day;
-          if (iso > isoToday) cell.classList.add('future');
-          if (active.has(iso)) cell.classList.add('active');
-          if (iso === isoToday) cell.classList.add('today');
-          cell.setAttribute('aria-label',day + ' ' + monthNames[viewMonth] + (active.has(iso) ? ', есть отметка' : ', нет отметки'));
-          grid.append(cell);
+          appendDay(day,viewYear,viewMonth,false);
+        }
+        const nextMonth = viewMonth === 11 ? 0 : viewMonth + 1;
+        const nextYear = viewMonth === 11 ? viewYear + 1 : viewYear;
+        for (let day = 1; day <= 42 - first - days; day += 1) {
+          appendDay(day,nextYear,nextMonth,true);
         }
         holder.append(title,weekdays,grid);
         document.getElementById('calendar-title').textContent = 'Календарь ' + viewYear;
