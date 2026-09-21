@@ -27,8 +27,6 @@ jobs:
         env:
           COMMIT_AUTHOR_NAME: ${{ secrets.COMMIT_AUTHOR_NAME }}
           COMMIT_AUTHOR_EMAIL: ${{ secrets.COMMIT_AUTHOR_EMAIL }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           if [ -z "$COMMIT_AUTHOR_NAME" ] || [ -z "$COMMIT_AUTHOR_EMAIL" ]; then
             echo "Add COMMIT_AUTHOR_NAME and COMMIT_AUTHOR_EMAIL in repository secrets before running this workflow."
@@ -38,18 +36,8 @@ jobs:
           git config user.email "$COMMIT_AUTHOR_EMAIL"
           git add public/data/checkins.json
           if git diff --cached --quiet; then
-            echo "No new check-in today; Telegram notification skipped."
+            echo "No new GitHub check-in today."
             exit 0
           fi
           git commit -m "chore: daily check-in"
           git push
-          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo "Telegram is not connected; add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to repository secrets."
-            exit 0
-          fi
-          PROGRESS=$(node -p "const d=require('./public/data/checkins.json'); d.days.length + ' of ' + (d.targetDays || 70)")
-          CHECKIN_DATE=$(node -p "require('./public/data/checkins.json').days.at(-1)")
-          MESSAGE=$(printf '✅ Check-in for %s was added\nProgress: %s' "$CHECKIN_DATE" "$PROGRESS")
-          curl --fail --silent --show-error --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${MESSAGE}"
