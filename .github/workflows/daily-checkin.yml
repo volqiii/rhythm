@@ -20,7 +20,7 @@ jobs:
   check-in:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Add today's check-in
         run: node scripts/mark-today.mjs --scheduled
       - name: Save the check-in
@@ -53,4 +53,3 @@ jobs:
           curl --fail --silent --show-error --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
             --data-urlencode "text=${MESSAGE}"
-
