@@ -1,0 +1,56 @@
+name: Daily check-in
+
+on:
+  schedule:
+    # Monday-Friday, 00:05 in Yekaterinburg (UTC+5).
+    # In UTC: Sunday-Thursday, 19:05.
+    - cron: '5 19 * * 0-4'
+    # Every Sunday at 00:05 in Yekaterinburg. Odd ISO weeks are skipped in the script.
+    - cron: '5 19 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-check-in
+  cancel-in-progress: false
+
+jobs:
+  check-in:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add today's check-in
+        run: node scripts/mark-today.mjs --scheduled
+      - name: Save the check-in
+        env:
+          COMMIT_AUTHOR_NAME: ${{ secrets.COMMIT_AUTHOR_NAME }}
+          COMMIT_AUTHOR_EMAIL: ${{ secrets.COMMIT_AUTHOR_EMAIL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$COMMIT_AUTHOR_NAME" ] || [ -z "$COMMIT_AUTHOR_EMAIL" ]; then
+            echo "Add COMMIT_AUTHOR_NAME and COMMIT_AUTHOR_EMAIL in repository secrets before running this workflow."
+            exit 1
+          fi
+          git config user.name "$COMMIT_AUTHOR_NAME"
+          git config user.email "$COMMIT_AUTHOR_EMAIL"
+          git add public/data/checkins.json
+          if git diff --cached --quiet; then
+            echo "No new check-in today; Telegram notification skipped."
+            exit 0
+          fi
+          git commit -m "chore: daily check-in"
+          git push
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram is not connected; add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to repository secrets."
+            exit 0
+          fi
+          PROGRESS=$(node -p "const d=require('./public/data/checkins.json'); d.days.length + ' of ' + (d.targetDays || 70)")
+          CHECKIN_DATE=$(node -p "require('./public/data/checkins.json').days.at(-1)")
+          MESSAGE=$(printf '✅ Check-in for %s was added\nProgress: %s' "$CHECKIN_DATE" "$PROGRESS")
+          curl --fail --silent --show-error --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${MESSAGE}"
+
