@@ -13,7 +13,7 @@ const parts = new Intl.DateTimeFormat('en-CA', {
 const today = `${parts.year}-${parts.month}-${parts.day}`;
 
 function level(value) {
-  return Math.min(4, Math.max(0, Math.floor(Number(value) || 0)));
+  return Math.min(15, Math.max(0, Math.floor(Number(value) || 0)));
 }
 
 function isoWeekNumber(year, month, day) {
