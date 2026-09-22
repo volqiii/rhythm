@@ -1,9 +1,6 @@
 {
-  "year": 2026,
-  "targetDays": 70,
-  "days": [
-    "2026-09-21",
-    "2026-09-22"
-  ],
-  "updatedAt": "2026-09-21T19:15:15.655Z"
+  "timeZone": "Asia/Yekaterinburg",
+  "days": [],
+  "updatedAt": null
 }
+
