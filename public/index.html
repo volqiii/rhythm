@@ -18,7 +18,9 @@
       .topbar { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:20px 40px; border-bottom:1px solid var(--line); }
       .brand { display:flex; align-items:center; gap:12px; font-size:1rem; font-weight:800; letter-spacing:-.04em; }
       .brand img { width:36px; height:36px; border-radius:11px; }
-      .topbar a { color:var(--cyan); font-size:.85rem; font-weight:700; }
+      .topbar a, .install-trigger { color:var(--cyan); font-size:.85rem; font-weight:700; }
+      button { font:inherit; }
+      .install-trigger { padding:0; border:0; background:transparent; cursor:pointer; }
       .hero { position:relative; padding:76px 40px 58px; overflow:hidden; }
       .hero::after { position:absolute; right:-110px; top:-120px; width:420px; height:420px; border:1px solid rgba(88,215,255,.16); border-radius:50%; box-shadow:0 0 0 54px rgba(94,84,214,.11),0 0 0 108px rgba(88,215,255,.04); content:""; }
       .eyebrow { position:relative; z-index:1; display:inline-flex; align-items:center; gap:9px; margin:0; color:var(--lime); font-size:.73rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
@@ -54,6 +56,18 @@
       .note { margin-top:34px; padding:18px 20px; border-left:3px solid var(--lime); border-radius:0 12px 12px 0; background:rgba(184,243,106,.06); color:var(--muted); font-size:.87rem; }
       footer { display:flex; justify-content:space-between; gap:16px; padding:23px 40px; border-top:1px solid var(--line); color:var(--muted); font-size:.78rem; }
       footer strong { color:var(--text); }
+      dialog { width:min(100% - 32px,550px); padding:0; border:1px solid rgba(116,165,221,.42); border-radius:22px; color:var(--text); background:#0b1a31; box-shadow:0 28px 100px rgba(0,0,0,.55); }
+      dialog::backdrop { background:rgba(2,8,19,.76); backdrop-filter:blur(5px); }
+      .dialog-body { padding:28px; }
+      .dialog-top { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+      .dialog-top h2 { margin:0; font-size:1.45rem; }
+      .dialog-top p { margin:7px 0 0; color:var(--muted); font-size:.88rem; }
+      .dialog-close { display:grid; width:34px; height:34px; place-items:center; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--text); cursor:pointer; font-size:1.2rem; }
+      .platform-choice { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:13px; padding:18px; border:1px solid var(--line); border-radius:15px; background:rgba(19,40,70,.62); transition:border-color .18s ease,transform .18s ease; }
+      .platform-choice:hover { border-color:var(--cyan); transform:translateY(-2px); }
+      .platform-choice strong { display:block; font-size:1.05rem; }
+      .platform-choice span { display:block; margin-top:3px; color:var(--muted); font-size:.8rem; }
+      .platform-choice b { color:var(--cyan); font-size:1.2rem; }
       @media (max-width:720px) { .shell { width:min(100% - 20px,650px); margin:10px auto; border-radius:22px; }.topbar,.content,footer { padding-left:22px; padding-right:22px; }.hero { padding:58px 22px 46px; }.principles,.install-grid { grid-template-columns:1fr; }.hero::after { right:-220px; }.section-title { line-height:1; } }
     </style>
   </head>
@@ -61,7 +75,7 @@
     <main class="shell">
       <header class="topbar">
         <a class="brand" href="#top" aria-label="Rhythm, в начало"><img src="./assets/rhythm-mark.svg" alt=""><span>Rhythm</span></a>
-        <a href="#install">Установить</a>
+        <button class="install-trigger" type="button" data-open-install>Установить</button>
       </header>
 
       <section class="hero" id="top">
@@ -69,8 +83,8 @@
         <h1>Твой день.<br><span>Твой уровень.</span></h1>
         <p class="lead">Небольшой шаблон для GitHub и GitVerse: выбери, какие дни оставить пустыми, а для каких задать уровень активности от 1 до 15.</p>
         <div class="actions">
-          <a class="button primary" href="#install">Начать установку</a>
-          <a class="button" href="#install">Как подключить</a>
+          <button class="button primary" type="button" data-open-install>Начать установку</button>
+          <a class="button" href="#levels">Настроить коммиты</a>
         </div>
       </section>
 
@@ -86,16 +100,16 @@
           <h2 class="section-title">Поставить за несколько минут</h2>
           <p class="section-lead">Один и тот же проект работает на обеих площадках. Для авторства коммитов нужны только имя и подтверждённый email в секретах репозитория.</p>
           <div class="install-grid">
-            <article class="install-card">
+            <article class="install-card" id="github-install">
               <div class="platform"><h3>GitHub</h3><span class="badge">Actions</span></div>
               <ol><li>Создайте репозиторий из шаблона.</li><li>Разрешите Actions записывать в репозиторий.</li><li>Добавьте `COMMIT_AUTHOR_NAME` и `COMMIT_AUTHOR_EMAIL` в Secrets.</li><li>Запустите <strong>Rhythm check-in</strong> один раз.</li></ol>
             </article>
-            <article class="install-card">
+            <article class="install-card" id="gitverse-install">
               <div class="platform"><h3>GitVerse</h3><span class="badge">CI/CD</span></div>
               <ol><li>Создайте публичный репозиторий и загрузите проект.</li><li>Добавьте два авторских секрета в настройках.</li><li>Откройте CI/CD и запустите <strong>Rhythm check-in</strong>.</li><li>При желании включите Pages из папки `/public`.</li></ol>
             </article>
           </div>
-          <article class="config-guide">
+          <article class="config-guide" id="levels">
             <span class="section-kicker">Настройка</span>
             <h3>Как регулировать коммиты самому</h3>
             <p>Открой файл <strong>rhythm.config.json</strong>, найди <strong>dateLevels</strong> и добавь дату с нужным числом. <strong>0</strong> оставит день пустым, а числа от <strong>1</strong> до <strong>15</strong> зададут число коммитов в этот день.</p>
@@ -114,6 +128,23 @@
 
       <footer><span><strong>Rhythm</strong> — регулярность, которую можно проверить.</span><span>2026</span></footer>
     </main>
+    <dialog id="install-dialog" aria-labelledby="install-title">
+      <div class="dialog-body">
+        <div class="dialog-top">
+          <div><h2 id="install-title">Где установить Rhythm?</h2><p>Выбери площадку — инструкция ниже покажет нужные шаги.</p></div>
+          <button class="dialog-close" type="button" aria-label="Закрыть" data-close-install>×</button>
+        </div>
+        <a class="platform-choice" href="#github-install" data-platform-choice><div><strong>GitHub</strong><span>Workflow через GitHub Actions</span></div><b>→</b></a>
+        <a class="platform-choice" href="#gitverse-install" data-platform-choice><div><strong>GitVerse</strong><span>Workflow через встроенный CI/CD</span></div><b>→</b></a>
+      </div>
+    </dialog>
+    <script>
+      const installDialog = document.getElementById('install-dialog');
+      document.querySelectorAll('[data-open-install]').forEach((button) => button.addEventListener('click', () => installDialog.showModal()));
+      document.querySelector('[data-close-install]').addEventListener('click', () => installDialog.close());
+      document.querySelectorAll('[data-platform-choice]').forEach((link) => link.addEventListener('click', () => installDialog.close()));
+      installDialog.addEventListener('click', (event) => { if (event.target === installDialog) installDialog.close(); });
+    </script>
   </body>
 </html>
 
