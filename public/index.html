@@ -51,6 +51,10 @@
       .config-guide { margin-top:12px; padding:25px; border:1px solid rgba(88,215,255,.3); border-radius:18px; background:linear-gradient(120deg,rgba(24,61,96,.52),rgba(13,26,48,.7)); }
       .config-guide h3 { margin:7px 0; font-size:1.24rem; letter-spacing:-.04em; }
       .config-guide p { max-width:690px; margin:0; color:var(--muted); font-size:.9rem; }
+      .guide-columns { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px; }
+      .guide-item { padding:18px; border:1px solid rgba(128,157,203,.22); border-radius:13px; background:rgba(7,18,33,.5); }
+      .guide-item strong { display:block; margin-bottom:6px; font-size:.92rem; }
+      .guide-item p { font-size:.84rem; }
       pre { margin:18px 0 0; padding:16px; overflow:auto; border:1px solid rgba(128,157,203,.22); border-radius:12px; background:#071221; color:#dce9ff; font:700 .82rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace; }
       code .key { color:var(--cyan); } code .number { display:inline; color:var(--lime); font:inherit; }
       .note { margin-top:34px; padding:18px 20px; border-left:3px solid var(--lime); border-radius:0 12px 12px 0; background:rgba(184,243,106,.06); color:var(--muted); font-size:.87rem; }
@@ -68,7 +72,7 @@
       .platform-choice strong { display:block; font-size:1.05rem; }
       .platform-choice span { display:block; margin-top:3px; color:var(--muted); font-size:.8rem; }
       .platform-choice b { color:var(--cyan); font-size:1.2rem; }
-      @media (max-width:720px) { .shell { width:min(100% - 20px,650px); margin:10px auto; border-radius:22px; }.topbar,.content,footer { padding-left:22px; padding-right:22px; }.hero { padding:58px 22px 46px; }.principles,.install-grid { grid-template-columns:1fr; }.hero::after { right:-220px; }.section-title { line-height:1; } }
+      @media (max-width:720px) { .shell { width:min(100% - 20px,650px); margin:10px auto; border-radius:22px; }.topbar,.content,footer { padding-left:22px; padding-right:22px; }.hero { padding:58px 22px 46px; }.principles,.install-grid,.guide-columns { grid-template-columns:1fr; }.hero::after { right:-220px; }.section-title { line-height:1; } }
     </style>
   </head>
   <body>
@@ -121,6 +125,24 @@
     <span class="key">"2026-09-26"</span>: <span class="number">0</span>
   }
 }</code></pre>
+          </article>
+          <article class="config-guide" id="timing">
+            <span class="section-kicker">Время и уведомления</span>
+            <h3>Когда запускать и как получать сообщения</h3>
+            <p>Время меняется в файлах workflow. Cron всегда работает в UTC: для Екатеринбурга нужно вычесть пять часов из желаемого времени.</p>
+            <div class="guide-columns">
+              <div class="guide-item">
+                <strong>Время запуска</strong>
+                <p>Открой <strong>.github/workflows/daily-checkin.yml</strong> и <strong>.gitverse/workflows/daily-checkin.yml</strong>, затем замени строку <strong>cron</strong> в обоих файлах.</p>
+                <pre><code>00:05 ЕКБ → 5 19 * * *
+09:00 ЕКБ → 0 4 * * *
+20:30 ЕКБ, пн–пт → 30 15 * * 1-5</code></pre>
+              </div>
+              <div class="guide-item">
+                <strong>Уведомление в Telegram</strong>
+                <p>На GitHub открой <strong>Settings → Secrets and variables → Actions</strong> и добавь <strong>TELEGRAM_BOT_TOKEN</strong> и <strong>TELEGRAM_CHAT_ID</strong>. После нового коммита бот пришлёт дату и количество записей.</p>
+              </div>
+            </div>
           </article>
           <p class="note">Цвет карты активности остаётся решением GitHub или GitVerse. Rhythm задаёт число записей в открытом личном журнале, но точный оттенок всегда зависит от правил площадки.</p>
         </section>
