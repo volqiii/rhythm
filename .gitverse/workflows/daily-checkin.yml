@@ -1,0 +1,42 @@
+name: Rhythm check-in
+
+on:
+  schedule:
+    # Каждый день в 00:05 по Екатеринбургу (UTC+5).
+    # rhythm.config.json решает, будет ли у даты отметка.
+    - cron: '5 19 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-in:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Save planned check-ins
+        env:
+          COMMIT_AUTHOR_NAME: ${{ secrets.COMMIT_AUTHOR_NAME }}
+          COMMIT_AUTHOR_EMAIL: ${{ secrets.COMMIT_AUTHOR_EMAIL }}
+        run: |
+          if [ -z "$COMMIT_AUTHOR_NAME" ] || [ -z "$COMMIT_AUTHOR_EMAIL" ]; then
+            echo "Add COMMIT_AUTHOR_NAME and COMMIT_AUTHOR_EMAIL in repository secrets before running Rhythm."
+            exit 1
+          fi
+          LEVEL=$(node scripts/mark-today.mjs --print-level)
+          if [ "$LEVEL" -eq 0 ]; then
+            echo "Today is planned as an empty day."
+            exit 0
+          fi
+          git config user.name "$COMMIT_AUTHOR_NAME"
+          git config user.email "$COMMIT_AUTHOR_EMAIL"
+          DID_COMMIT=false
+          for NUMBER in $(seq 1 "$LEVEL"); do
+            node scripts/mark-today.mjs --scheduled
+            git add public/data/checkins.json
+            if git diff --cached --quiet; then
+              continue
+            fi
+            git commit -m "chore: rhythm check-in ($NUMBER/$LEVEL)"
+            DID_COMMIT=true
+          done
+          if [ "$DID_COMMIT" = true ]; then git push; else echo "The planned level is already complete."; fi
+
