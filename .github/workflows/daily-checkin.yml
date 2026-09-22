@@ -23,6 +23,8 @@ jobs:
         env:
           COMMIT_AUTHOR_NAME: ${{ secrets.COMMIT_AUTHOR_NAME }}
           COMMIT_AUTHOR_EMAIL: ${{ secrets.COMMIT_AUTHOR_EMAIL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           if [ -z "$COMMIT_AUTHOR_NAME" ] || [ -z "$COMMIT_AUTHOR_EMAIL" ]; then
             echo "Add COMMIT_AUTHOR_NAME and COMMIT_AUTHOR_EMAIL in repository secrets before running Rhythm."
@@ -36,6 +38,7 @@ jobs:
           git config user.name "$COMMIT_AUTHOR_NAME"
           git config user.email "$COMMIT_AUTHOR_EMAIL"
           DID_COMMIT=false
+          ADDED=0
           for NUMBER in $(seq 1 "$LEVEL"); do
             node scripts/mark-today.mjs --scheduled
             git add public/data/checkins.json
@@ -44,6 +47,20 @@ jobs:
             fi
             git commit -m "chore: rhythm check-in ($NUMBER/$LEVEL)"
             DID_COMMIT=true
+            ADDED=$((ADDED + 1))
           done
-          if [ "$DID_COMMIT" = true ]; then git push; else echo "The planned level is already complete."; fi
+          if [ "$DID_COMMIT" = true ]; then
+            git push
+            if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+              echo "Telegram is not connected. Add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to enable notifications."
+              exit 0
+            fi
+            CHECKIN_DATE=$(node -p "require('./public/data/checkins.json').entries.at(-1).date")
+            MESSAGE=$(printf '✅ Rhythm: %s\nДобавлено коммитов: %s' "$CHECKIN_DATE" "$ADDED")
+            curl --fail --silent --show-error --retry 3 --retry-delay 3 --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+              --data-urlencode "text=${MESSAGE}"
+          else
+            echo "The planned level is already complete."
+          fi
 
