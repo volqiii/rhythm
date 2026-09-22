@@ -134,15 +134,14 @@
           <div><h2 id="install-title">Где установить Rhythm?</h2><p>Выбери площадку — инструкция ниже покажет нужные шаги.</p></div>
           <button class="dialog-close" type="button" aria-label="Закрыть" data-close-install>×</button>
         </div>
-        <a class="platform-choice" href="#github-install" data-platform-choice><div><strong>GitHub</strong><span>Workflow через GitHub Actions</span></div><b>→</b></a>
-        <a class="platform-choice" href="#gitverse-install" data-platform-choice><div><strong>GitVerse</strong><span>Workflow через встроенный CI/CD</span></div><b>→</b></a>
+        <a class="platform-choice" href="https://github.com/volqiii/rhythm"><div><strong>GitHub</strong><span>Открыть репозиторий Rhythm на GitHub</span></div><b>→</b></a>
+        <a class="platform-choice" href="https://gitverse.ru/volqi/rhythm"><div><strong>GitVerse</strong><span>Открыть репозиторий Rhythm на GitVerse</span></div><b>→</b></a>
       </div>
     </dialog>
     <script>
       const installDialog = document.getElementById('install-dialog');
       document.querySelectorAll('[data-open-install]').forEach((button) => button.addEventListener('click', () => installDialog.showModal()));
       document.querySelector('[data-close-install]').addEventListener('click', () => installDialog.close());
-      document.querySelectorAll('[data-platform-choice]').forEach((link) => link.addEventListener('click', () => installDialog.close()));
       installDialog.addEventListener('click', (event) => { if (event.target === installDialog) installDialog.close(); });
     </script>
   </body>
