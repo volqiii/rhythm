@@ -1,0 +1,8 @@
+{
+  "timeZone": "Asia/Yekaterinburg",
+  "activeWeekdays": [1, 2, 3, 4, 5],
+  "biweeklySunday": true,
+  "defaultLevel": 1,
+  "dateLevels": {}
+}
+
