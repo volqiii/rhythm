@@ -2,9 +2,7 @@ name: Rhythm check-in
 
 on:
   schedule:
-    # Daily run at 05:10 in Yekaterinburg (UTC+5 = 00:10 UTC).
-    # rhythm.config.json decides whether today's date is active or skipped.
-    - cron: '10 0 * * *'
+    - cron: '10 19 * * *'
   workflow_dispatch:
 
 permissions:
@@ -139,5 +137,19 @@ jobs:
             echo "Synced $SYNCED check-in commits to GitVerse master individually."
           else
             echo "GitVerse is already up to date."
+          fi
+
+      - name: Restore daily schedule after one-time test
+        if: always() && github.event_name == 'schedule'
+        run: |
+          sed -i "s/10 19 \\* \\* \\*/10 0 * * */" .github/workflows/daily-checkin.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/daily-checkin.yml
+          if git diff --cached --quiet; then
+            echo "Normal schedule was already restored."
+          else
+            git commit -m "Restore daily Rhythm check-in schedule after test"
+            git push origin HEAD:main
           fi
 
