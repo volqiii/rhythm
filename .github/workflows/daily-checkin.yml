@@ -149,10 +149,10 @@ jobs:
           workflow = Path(".github/workflows/daily-checkin.yml")
           content = workflow.read_text()
           temporary = """    # Temporary one-time run at 23:45 Yekaterinburg (18:45 UTC), then auto-restore.
-              - cron: '45 18 * * *'"""
+    - cron: '45 18 * * *'"""
           regular = """    # Daily run at 05:10 in Yekaterinburg (UTC+5 = 00:10 UTC).
-              # rhythm.config.json decides whether today's date is active or skipped.
-              - cron: '10 0 * * *'"""
+    # rhythm.config.json decides whether today's date is active or skipped.
+    - cron: '10 0 * * *'"""
           if temporary not in content:
               raise SystemExit("Temporary schedule not found; leaving file unchanged.")
           workflow.write_text(content.replace(temporary, regular, 1))
