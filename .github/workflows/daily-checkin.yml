@@ -130,13 +130,13 @@ jobs:
             COMMIT_DATE="$(git -C "$SOURCE_DIR" show -s --format=%aI "$SHA")"
             GIT_AUTHOR_DATE="$COMMIT_DATE" GIT_COMMITTER_DATE="$COMMIT_DATE" \
               git -C "$VERSE_DIR" commit -m "$MESSAGE"
+            git -C "$VERSE_DIR" push origin HEAD:master
             VERSE_STATE="$STATE"
             SYNCED=$((SYNCED + 1))
           done < <(git -C "$SOURCE_DIR" rev-list --reverse "$MATCH_SHA..HEAD" -- public/data/checkins.json)
 
           if [ "$SYNCED" -gt 0 ]; then
-            git -C "$VERSE_DIR" push origin HEAD:master
-            echo "Synced $SYNCED check-in commits to GitVerse master."
+            echo "Synced $SYNCED check-in commits to GitVerse master individually."
           else
             echo "GitVerse is already up to date."
           fi
