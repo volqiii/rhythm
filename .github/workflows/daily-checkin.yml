@@ -2,8 +2,9 @@ name: Rhythm check-in
 
 on:
   schedule:
-    # Temporary one-time run at 23:45 Yekaterinburg (18:45 UTC), then auto-restore.
-    - cron: '45 18 * * *'
+    # Daily run at 05:10 in Yekaterinburg (UTC+5 = 00:10 UTC).
+    # rhythm.config.json decides whether today's date is active or skipped.
+    - cron: '10 0 * * *'
   workflow_dispatch:
 
 permissions:
@@ -140,29 +141,3 @@ jobs:
             echo "GitVerse is already up to date."
           fi
 
-      - name: Restore daily schedule after one-time test
-        if: always() && github.event_name == 'schedule'
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          workflow = Path(".github/workflows/daily-checkin.yml")
-          content = workflow.read_text()
-          temporary = """    # Temporary one-time run at 23:45 Yekaterinburg (18:45 UTC), then auto-restore.
-    - cron: '45 18 * * *'"""
-          regular = """    # Daily run at 05:10 in Yekaterinburg (UTC+5 = 00:10 UTC).
-    # rhythm.config.json decides whether today's date is active or skipped.
-    - cron: '10 0 * * *'"""
-          if temporary not in content:
-              raise SystemExit("Temporary schedule not found; leaving file unchanged.")
-          workflow.write_text(content.replace(temporary, regular, 1))
-          PY
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows/daily-checkin.yml
-          if git diff --cached --quiet; then
-            echo "Normal schedule was already restored."
-          else
-            git commit -m "Restore daily Rhythm check-in schedule after test"
-            git push origin HEAD:main
-          fi
