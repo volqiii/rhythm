@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Save planned check-ins
         env:
           COMMIT_AUTHOR_NAME: ${{ secrets.COMMIT_AUTHOR_NAME }}
@@ -62,4 +64,79 @@ jobs:
               --data-urlencode "text=${MESSAGE}"
           else
             echo "The planned level is already complete."
+          fi
+
+      - name: Sync check-ins to GitVerse
+        env:
+          GITVERSE_TOKEN: ${{ secrets.GITVERSE_TOKEN }}
+          COMMIT_AUTHOR_NAME: ${{ secrets.COMMIT_AUTHOR_NAME }}
+          COMMIT_AUTHOR_EMAIL: ${{ secrets.COMMIT_AUTHOR_EMAIL }}
+        run: |
+          set -euo pipefail
+          if [ -z "$GITVERSE_TOKEN" ]; then
+            echo "::error::Add GITVERSE_TOKEN to repository Actions secrets."
+            exit 1
+          fi
+
+          SOURCE_DIR="$GITHUB_WORKSPACE"
+          VERSE_DIR="$(mktemp -d)"
+          trap 'rm -rf "$VERSE_DIR"' EXIT
+          VERSE_URL="https://${GITVERSE_TOKEN}@gitverse.ru/volqi/rhythm.git"
+          git clone --quiet --branch master --single-branch "$VERSE_URL" "$VERSE_DIR"
+
+          VERSE_FILE="$VERSE_DIR/public/data/checkins.json"
+          if [ ! -f "$VERSE_FILE" ]; then
+            echo "::error::GitVerse branch master does not contain public/data/checkins.json."
+            exit 1
+          fi
+
+          read_last_state() {
+            node -e 'const fs=require("fs"); const e=JSON.parse(fs.readFileSync(process.argv[1],"utf8")).entries.at(-1); process.stdout.write(e ? `${e.date}|${e.number}` : "")' "$1"
+          }
+          read_commit_state() {
+            git -C "$SOURCE_DIR" show "$1:public/data/checkins.json" |
+              node -e 'let s=""; process.stdin.on("data",x=>s+=x).on("end",()=>{const e=JSON.parse(s).entries.at(-1); process.stdout.write(e ? `${e.date}|${e.number}` : "")})'
+          }
+
+          VERSE_STATE="$(read_last_state "$VERSE_FILE")"
+          MATCH_SHA=""
+          while IFS= read -r SHA; do
+            STATE="$(read_commit_state "$SHA")"
+            if [ "$STATE" = "$VERSE_STATE" ]; then
+              MATCH_SHA="$SHA"
+            fi
+          done < <(git -C "$SOURCE_DIR" log --format='%H' --reverse HEAD -- public/data/checkins.json)
+
+          if [ -z "$MATCH_SHA" ]; then
+            echo "::error::Could not match GitVerse's latest check-in with GitHub history; leaving GitVerse unchanged."
+            exit 1
+          fi
+
+          git -C "$VERSE_DIR" config user.name "$COMMIT_AUTHOR_NAME"
+          git -C "$VERSE_DIR" config user.email "$COMMIT_AUTHOR_EMAIL"
+          SYNCED=0
+          while IFS= read -r SHA; do
+            STATE="$(read_commit_state "$SHA")"
+            if [ "$STATE" = "$VERSE_STATE" ]; then
+              continue
+            fi
+            git -C "$SOURCE_DIR" show "$SHA:public/data/checkins.json" > "$VERSE_FILE"
+            git -C "$VERSE_DIR" add public/data/checkins.json
+            if git -C "$VERSE_DIR" diff --cached --quiet; then
+              VERSE_STATE="$STATE"
+              continue
+            fi
+            MESSAGE="$(git -C "$SOURCE_DIR" show -s --format=%s "$SHA")"
+            COMMIT_DATE="$(git -C "$SOURCE_DIR" show -s --format=%aI "$SHA")"
+            GIT_AUTHOR_DATE="$COMMIT_DATE" GIT_COMMITTER_DATE="$COMMIT_DATE" \
+              git -C "$VERSE_DIR" commit -m "$MESSAGE"
+            VERSE_STATE="$STATE"
+            SYNCED=$((SYNCED + 1))
+          done < <(git -C "$SOURCE_DIR" rev-list --reverse "$MATCH_SHA..HEAD" -- public/data/checkins.json)
+
+          if [ "$SYNCED" -gt 0 ]; then
+            git -C "$VERSE_DIR" push origin HEAD:master
+            echo "Synced $SYNCED check-in commits to GitVerse master."
+          else
+            echo "GitVerse is already up to date."
           fi
