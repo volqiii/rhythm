@@ -2,9 +2,9 @@ name: Rhythm check-in
 
 on:
   schedule:
-    # Every day at 05:10 in Yekaterinburg (UTC+5 = 00:10 UTC).
+    # Temporary test: 18:10 in Yekaterinburg (UTC+5 = 13:10 UTC).
     # rhythm.config.json decides whether today's date is active or skipped.
-    - cron: '10 0 * * *'
+    - cron: '10 13 * * *'
   workflow_dispatch:
 
 permissions:
