@@ -2,7 +2,7 @@ name: Rhythm check-in
 
 on:
   schedule:
-    - cron: '10 0 * * *'
+    - cron: '23 19 * * *'
   workflow_dispatch:
 
 permissions:
@@ -139,4 +139,16 @@ jobs:
             echo "GitVerse is already up to date."
           fi
 
-
+      - name: Restore regular schedule after one-time test
+        if: always() && github.event_name == 'schedule'
+        run: |
+          sed -i "s/23 19 \\* \\* \\*/10 0 * * */" .github/workflows/daily-checkin.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/daily-checkin.yml
+          if git diff --cached --quiet; then
+            echo "Regular schedule was already restored."
+          else
+            git commit -m "Restore regular Rhythm schedule after one-time test"
+            git push origin HEAD:main
+          fi
