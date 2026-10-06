@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '10 0 * * *' # 05:10 Yekaterinburg
     - cron: '40 0 * * *' # 05:40 backup if the first schedule is missed
+    - cron: '47 7 6 10 *' # one-time test on 6 Oct 2026, 12:47 Yekaterinburg
   workflow_dispatch:
 
 permissions:
@@ -41,7 +42,7 @@ jobs:
           DID_COMMIT=false
           ADDED=0
           MARK_TODAY_ARGS=(--scheduled)
-          if [ "${{ github.event.schedule }}" = "10 0 * * *" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ github.event.schedule }}" = "10 0 * * *" ] || { [ "${{ github.event.schedule }}" = "47 7 6 10 *" ] && [ "$(date -u +%F)" = "2026-10-06" ]; } || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             MARK_TODAY_ARGS+=(--force-existing)
           fi
           for NUMBER in $(seq 1 "$LEVEL"); do
