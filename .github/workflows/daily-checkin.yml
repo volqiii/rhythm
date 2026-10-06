@@ -4,8 +4,6 @@ on:
   schedule:
     - cron: '10 0 * * *' # 05:10 Yekaterinburg
     - cron: '40 0 * * *' # 05:40 backup if the first schedule is missed
-    - cron: '50 5 * * *' # temporary 10:50 attempt
-    - cron: '*/5 6 * * *' # temporary 11:00-11:55 retry window
   workflow_dispatch:
 
 permissions:
@@ -43,7 +41,7 @@ jobs:
           DID_COMMIT=false
           ADDED=0
           MARK_TODAY_ARGS=(--scheduled)
-          if [ "${{ github.event.schedule }}" = "*/5 6 * * *" ]; then
+          if [ "${{ github.event.schedule }}" = "10 0 * * *" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             MARK_TODAY_ARGS+=(--force-existing)
           fi
           for NUMBER in $(seq 1 "$LEVEL"); do
@@ -145,18 +143,4 @@ jobs:
             echo "Synced $SYNCED check-in commits to GitVerse master individually."
           else
             echo "GitVerse is already up to date."
-          fi
-
-      - name: Remove one-time 10:50 schedule after run
-        if: always() && github.event_name == 'schedule'
-        run: |
-          sed -i '/temporary 10:50 attempt/d; /temporary 11:00-11:55 retry window/d' .github/workflows/daily-checkin.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows/daily-checkin.yml
-          if git diff --cached --quiet; then
-            echo "Regular schedule was already restored."
-          else
-            git commit -m "Restore regular Rhythm schedule after one-time test"
-            git push origin HEAD:main
           fi
