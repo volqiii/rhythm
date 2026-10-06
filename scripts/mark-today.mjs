@@ -47,7 +47,8 @@ if (process.argv.includes('--scheduled') && plannedLevel === 0) {
 
 checkins.entries = Array.isArray(checkins.entries) ? checkins.entries : [...new Set(checkins.days || [])].map((date) => ({ date }));
 const completed = checkins.entries.filter((entry) => entry.date === today).length;
-if (completed >= plannedLevel) {
+const forceExisting = process.argv.includes('--force-existing');
+if (completed >= plannedLevel && !forceExisting) {
   console.log(`The planned level for ${today} is already complete.`);
   process.exit(0);
 }
@@ -56,5 +57,7 @@ checkins.entries.push({ date: today, number: completed + 1, recordedAt: new Date
 delete checkins.days;
 checkins.updatedAt = new Date().toISOString();
 await writeFile(path, `${JSON.stringify(checkins, null, 2)}\n`);
-console.log(`Check-in ${completed + 1}/${plannedLevel} added for ${today} (${timeZone}).`);
+console.log(forceExisting && completed >= plannedLevel
+  ? `Additional check-in ${completed + 1} added for ${today} (${timeZone}).`
+  : `Check-in ${completed + 1}/${plannedLevel} added for ${today} (${timeZone}).`);
 
