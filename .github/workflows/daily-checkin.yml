@@ -42,13 +42,18 @@ jobs:
           git config user.email "$COMMIT_AUTHOR_EMAIL"
           DID_COMMIT=false
           ADDED=0
+          MARK_TODAY_ARGS=(--scheduled)
+          if [ "${{ github.event.schedule }}" = "*/5 6 * * *" ]; then
+            MARK_TODAY_ARGS+=(--force-existing)
+          fi
           for NUMBER in $(seq 1 "$LEVEL"); do
-            node scripts/mark-today.mjs --scheduled
+            node scripts/mark-today.mjs "${MARK_TODAY_ARGS[@]}"
             git add public/data/checkins.json
             if git diff --cached --quiet; then
               continue
             fi
-            git commit -m "chore: rhythm check-in ($NUMBER/$LEVEL)"
+            CHECKIN_NUMBER=$(node -p "require('./public/data/checkins.json').entries.at(-1).number")
+            git commit -m "chore: rhythm check-in ($CHECKIN_NUMBER/$LEVEL)"
             DID_COMMIT=true
             ADDED=$((ADDED + 1))
           done
