@@ -1,8 +1,6 @@
 name: Rhythm check-in
 
 on:
-  schedule:
-    - cron: '10,25,40,55 0-2 * * *' # 05:10, then retries every 15 minutes through 07:55 Yekaterinburg
   workflow_dispatch:
 
 permissions:
