@@ -76,7 +76,7 @@ jobs:
           done
           if [ "$DID_COMMIT" = true ]; then
             if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
-              git tag -a "$GENERATED_REF" -m "Scheduled Rhythm check-ins $LOCAL_DATE"
+              git tag -a "rhythm-generated/$LOCAL_DATE" -m "Scheduled Rhythm check-ins $LOCAL_DATE"
               git push --atomic origin "HEAD:$GITHUB_REF" "$GENERATED_REF"
             else
               git push
@@ -175,5 +175,5 @@ jobs:
         run: |
           LOCAL_DATE="$(TZ=Asia/Yekaterinburg date +%F)"
           DONE_REF="refs/tags/rhythm-daily/$LOCAL_DATE"
-          git tag -a "$DONE_REF" -m "Rhythm check-ins synced to GitVerse on $LOCAL_DATE"
+          git tag -a "rhythm-daily/$LOCAL_DATE" -m "Rhythm check-ins synced to GitVerse on $LOCAL_DATE"
           git push origin "$DONE_REF"
