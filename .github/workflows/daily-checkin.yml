@@ -60,7 +60,7 @@ jobs:
           git config user.email "$COMMIT_AUTHOR_EMAIL"
           DID_COMMIT=false
           ADDED=0
-          MARK_TODAY_ARGS=(--scheduled --force-existing)
+          MARK_TODAY_ARGS=(--scheduled)
           for NUMBER in $(seq 1 "$LEVEL"); do
             node scripts/mark-today.mjs "${MARK_TODAY_ARGS[@]}"
             git add public/data/checkins.json
